@@ -18,7 +18,11 @@
   <body>
     <div>
       <!-- Ini untuk login ceritanya -->
-      <div class="container w-25 border mt-4" style="height: auto" id="loginContainer">
+      <div
+        class="container w-25 border mt-4"
+        style="height: auto"
+        id="loginContainer"
+      >
         <h1><%= title %></h1>
         <form action="" id="login">
           <input
@@ -39,11 +43,12 @@
         <h1>Diskusi Terbuka</h1>
         <form action="" id="chat">
           <div id="messageList" style="height: 400px" class="border"></div>
-          <input type="text" class="w-100 form-control" />
+          <input type="text" class="w-100 form-control mt-2" id="message" />
           <input
             type="submit"
             class="btn btn-danger w-100 mt-2 mb-1"
             value="Kirim Pesan"
+            id="sendBtn"
           />
         </form>
       </div>
@@ -56,15 +61,46 @@
       integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
       crossorigin="anonymous"
     ></script>
+    <script src="/socket.io/socket.io.js"></script>
     <script>
+      const socket = io();
       const chatContainer = document.getElementById("chatContainer");
       const loginContainer = document.getElementById("loginContainer");
+      const message = document.getElementById("message");
+      const sendBtn = document.getElementById("sendBtn");
+      const messageList = document.getElementById("messageList");
+
       chatContainer.style.display = "none";
       loginBtn.addEventListener("click", (e) => {
         e.preventDefault();
-        chatContainer.style.display = "block"; 
+        chatContainer.style.display = "block";
         loginContainer.style.display = "none";
       });
+
+      sendBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        if (message.value) {
+          const data = {
+            id : socket.id,
+            message: message.value
+          }
+          socket.emit("chat message", data);
+          let chatList = document.createElement("p");
+          chatList.style.fontSize = "20px";
+          chatList.setAttribute("class", " m-2 bg-primary");
+          chatList.textContent = message.value;
+          messageList.appendChild(chatList);
+          message.value = "";
+        }
+      });
+
+      socket.on("chat message", ((id, message) => {
+        let broadcast = document.createElement("p");
+        broadcast.style.fontSize = "20px";
+        broadcast.setAttribute("class", " m-2 text-end bg-success");
+        broadcast.textContent = `${message} \n *(${id})`;
+        messageList.appendChild(broadcast);
+      }));
     </script>
     <!-- Option 2: Separate Popper and Bootstrap JS -->
     <!--
